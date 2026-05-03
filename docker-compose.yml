@@ -1,0 +1,68 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: stu_handbook_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./data/qdrant_storage:/qdrant/storage
+    networks:
+      - rag_network
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<> /dev/tcp/127.0.0.1/6333"]
+      interval: 10s
+
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: stu_handbook_redis
+    ports:
+      - "6379:6379"
+      - "8001:8001" # Redis Insight
+    volumes:
+      - ./data/redis_data:/data
+    networks:
+      - rag_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    container_name: stu_handbook_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+      - ./data:/app/data
+      - hf_cache:/app/hf_cache
+    env_file:
+      - .env
+    networks:
+      - rag_network
+
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: on-failure
+
+networks:
+  rag_network:
+    driver: bridge
+
+volumes:
+  qdrant_storage:
+  redis_data:
+  hf_cache:

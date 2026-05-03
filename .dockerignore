@@ -1,0 +1,17 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.git/
+.agents/
+.env
+.pytest_cache/
+tests/
+experiments/
+notebook/
+documents/
+conductor/
+*.md
+!README.md
+.vscode/
+.idea/
