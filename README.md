@@ -176,7 +176,7 @@ flowchart TB
     VStore --> Qdrant
 ```
 
-### Giải thích ngắn
+### Giải thích
 
 - **Presentation**: người dùng tương tác qua Gradio UI hoặc gọi trực tiếp REST API (FastAPI/Swagger).
 - **API Layer (`app/api`)**: ba router chính — `chat` (hỏi đáp), `ingestion` (nạp tài liệu), `evaluation` (đánh giá chất lượng).
